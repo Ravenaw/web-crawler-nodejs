@@ -11,5 +11,13 @@
   "dependencies": {
     "axios": "^0.27.2",
     "cheerio": "^1.0.0-rc.12"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tonel/web-crawler-nodejs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Tonel/web-crawler-nodejs/issues"
+  },
+  "homepage": "https://github.com/Tonel/web-crawler-nodejs#readme"
 }
