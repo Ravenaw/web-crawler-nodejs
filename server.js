@@ -35,12 +35,12 @@ async function main(maxPages = 10) {
   // initialized with the first webpage to visit
   const mainURL = "https://www.proshop.dk";
   const paginationURLsToVisit = [
-    "https://www.proshop.dk/baerbar",
-    "https://www.proshop.dk/mobil",
-    "https://www.proshop.dk/tablet",
-    "https://www.proshop.dk/Fladskaerms-TV",
-    "https://www.proshop.dk/Baerbare-Festhoejttaler",
-    "https://www.proshop.dk/Hjemmebio"
+    mainURL + "/baerbar",
+    mainURL + "/mobil",
+    mainURL + "/tablet",
+    mainURL + "/Fladskaerms-TV",
+    mainURL + "/Baerbare-Festhoejttaler",
+    mainURL + "/Hjemmebio"
   ];
   const visitedURLs = [];
 
@@ -119,7 +119,7 @@ async function main(maxPages = 10) {
     // insert product image
     product_db.prepare(
       "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)").run
-      (product_db.lastInsertRowid, product.image_url);
+      (product_db.lastInsertRowid, mainURL + product.image_url);
   }
 
   // close the database connection
