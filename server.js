@@ -67,11 +67,11 @@ async function main(maxPages = 10) {
     //console.log([...productURLs]);
 
     // use productURLs for scraping purposes...
-    productURLs.forEach(async (productURL) => {
+    for (const productURL of productURLs) {
         const pageHTML = await axios.get(productURL);
         const $ = cheerio.load(pageHTML.data);
         const product= new Product({
-            product_name: $(".hidden-xs li").text(),
+            product_name: $(".hidden-xs").text(),
             product_description: $(".site-product-short-description").text(),
             main_category: $(".breadcrumb li:nth-child(2)").text(),
             sub_category: $(".breadcrumb li:nth-child(3)").text(),
@@ -79,9 +79,9 @@ async function main(maxPages = 10) {
             link: productURL,
             image_url: $(".h-auto").attr("src")
         });
-        console.log($(".site-stock-text div").text());
         products.push(product);
-    });
+    }
+    console.log(products[0]);
 }
 
 main()
