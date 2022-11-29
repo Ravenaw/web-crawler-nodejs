@@ -109,7 +109,7 @@ async function main(maxPages = 10) {
         id INTEGER PRIMARY KEY, \
         product_name TEXT, \
         product_sub_title TEXT, \
-        product_desctiption TEXT, \
+        product_description TEXT, \
         main_category TEXT, \
         sub_category TEXT, \
         price DOUBLE, \
@@ -129,11 +129,12 @@ async function main(maxPages = 10) {
 
   // insert data
   for (const product of products) {
+    // insert product
     product_db.run(
-      "INSERT INTO products (product_name, product_desctiption, main_category, sub_category, price, link) VALUES (?, ?, ?, ?, ?, ?)",
+      "INSERT INTO products (product_name, product_description, main_category, sub_category, price, link) VALUES (?, ?, ?, ?, ?, ?)",
       [
         product.product_name,
-        product.product_desctiption,
+        product.product_description,
         product.main_category,
         products.sub_category,
         products.price,
@@ -146,9 +147,16 @@ async function main(maxPages = 10) {
         console.log(`A row has been inserted with rowid ${this.lastID}`);
       }
     );
+
+    // insert product image
     product_db.run(
       "INSERT INTO product_id, image_url VALUES (?, ?)",
-      [products.indexOf(product), product.image_url],
+      [
+        products_db.run("SELECT id FROM products WHERE product_name=?", [
+          product.product_name,
+        ]),
+        product.image_url,
+      ],
       function (err) {
         if (err) {
           return console.log(err.message);
