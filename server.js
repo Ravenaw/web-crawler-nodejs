@@ -30,6 +30,10 @@ async function main(maxPages = 10) {
   const paginationURLsToVisit = [
     "https://www.proshop.dk/baerbar",
     "https://www.proshop.dk/mobil",
+    "https://www.proshop.dk/tablet",
+    "https://www.proshop.dk/Fladskaerms-TV",
+    "https://www.proshop.dk/Baerbare-Festhoejttaler",
+    "https://www.proshop.dk/Hjemmebio"
   ];
   const visitedURLs = [];
 
