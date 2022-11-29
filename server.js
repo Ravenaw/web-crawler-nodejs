@@ -1,28 +1,35 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-const sqlite3 = require("sqlite3").verbose();
 const ftp = require("ftp");
 
-//Product schema
-class Product {
-  constructor(
-    product_name,
-    product_description,
-    main_category,
-    sub_category,
-    price,
-    link,
-    image_url
-  ) {
-    this.product_name = product_name;
-    this.product_description = product_description;
-    this.main_category = main_category;
-    this.sub_category = sub_category;
-    this.price = price;
-    this.link = link;
-    this.image_url = image_url;
-  }
-}
+const Database = require("better-sqlite3");
+const product_db = new Database("products.db", { verbose: console.log });
+
+
+
+// create table
+product_db.exec(
+  "CREATE TABLE IF NOT EXISTS products ( \
+  id INTEGER PRIMARY KEY, \
+  product_name TEXT, \
+  product_sub_title TEXT, \
+  product_description TEXT, \
+  main_category TEXT, \
+  sub_category TEXT, \
+  price DOUBLE, \
+  link TEXT, \
+  overall_rating DOUBLE \
+)"
+);
+
+product_db.exec(
+  "CREATE TABLE IF NOT EXISTS product_images ( \
+  product_id INTEGER PRIMARY KEY, \
+  image_url TEXT, \
+  alt_text TEXT, \
+  additional_info TEXT \
+)"
+);
 
 async function main(maxPages = 10) {
   // initialized with the first webpage to visit
@@ -42,7 +49,7 @@ async function main(maxPages = 10) {
 
   // iterating until the queue is empty
   // or the iteration limit is hit
-  while (paginationURLsToVisit.length !== 0) {
+  while (paginationURLsToVisit.length != 0) {
     // the current webpage to crawl
     const paginationURL = paginationURLsToVisit.pop();
 
@@ -84,90 +91,35 @@ async function main(maxPages = 10) {
   for (const productURL of productURLs) {
     const pageHTML = await axios.get(productURL);
     const $ = cheerio.load(pageHTML.data);
-    const product = new Product({
-      product_name: $(".hidden-xs").text(),
-      product_description: $(".site-product-short-description").text(),
+    var product = {
+      product_name: $('h1[data-type="product"]').text(),
+      product_description: $('p[class="site-product-short-description"]').text(),
       main_category: $(".breadcrumb li:nth-child(2)").text(),
       sub_category: $(".breadcrumb li:nth-child(3)").text(),
       price: $(".site-currency-attention").text().trimEnd(" kr."),
       link: productURL,
       image_url: $(".h-auto").attr("src"),
-    });
+    };
     products.push(product);
   }
   console.log(products[0]);
 
-  // create database
-  const product_db = new sqlite3.Database("products.db", (err) => {
-    if (err) {
-      return console.error(err.message);
-    }
-    console.log("Connected to the in-memory SQlite database.");
-  });
 
-  // create table
-  product_db.run("DROP TABLE products, product_images");
 
-  product_db.run(
-    "CREATE TABLE IF NOT EXISTS products ( \
-        id INTEGER PRIMARY KEY, \
-        product_name TEXT, \
-        product_sub_title TEXT, \
-        product_description TEXT, \
-        main_category TEXT, \
-        sub_category TEXT, \
-        price DOUBLE, \
-        link TEXT, \
-        overall_rating DOUBLE \
-      )"
-  );
 
-  product_db.run(
-    "CREATE TABLE IF NOT EXISTS product_images ( \
-        product_id INTEGER PRIMARY KEY, \
-        image_url TEXT, \
-        alt_text TEXT, \
-        additional_info TEXT \
-      )"
-  );
+
 
   // insert data
   for (const product of products) {
     // insert product
-    product_db.run(
-      "INSERT INTO products (product_name, product_description, main_category, sub_category, price, link) VALUES (?, ?, ?, ?, ?, ?)",
-      [
-        product.product_name,
-        product.product_description,
-        product.main_category,
-        products.sub_category,
-        products.price,
-        products.link,
-      ],
-      function (err) {
-        if (err) {
-          return console.log(err.message);
-        }
-        console.log(`A row has been inserted with rowid ${this.lastID}`);
-      }
-    );
+    product_db.prepare(
+      "INSERT INTO products (product_name, product_description, main_category, sub_category, price, link) VALUES (?, ?, ?, ?, ?, ?)").run
+      (product.product_name, product.product_description, product.main_category, product.sub_category, product.price, product.link);
 
     // insert product image
-    product_db.run(
-      "INSERT INTO product_id, image_url VALUES (?, ?)",
-      [
-        products_db.run("SELECT id FROM products WHERE product_name=?", [
-          product.product_name,
-        ]),
-        product.image_url,
-      ],
-      function (err) {
-        if (err) {
-          return console.log(err.message);
-        }
-        console.log(`A row has been inserted with rowid ${this.lastID}`);
-      }
-    );
+    product_db.prepare(
+      "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)").run
+      (product_db.lastInsertRowid, product.image_url);
   }
 
   // close the database connection

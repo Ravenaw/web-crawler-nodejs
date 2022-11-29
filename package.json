@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.27.2",
+    "better-sqlite3": "^8.0.0",
     "cheerio": "^1.0.0-rc.12",
     "ftp": "^0.3.10",
     "sqlite3": "^5.1.2"
