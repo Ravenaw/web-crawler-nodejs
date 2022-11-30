@@ -5,8 +5,6 @@ const ftp = require("ftp");
 const Database = require("better-sqlite3");
 const product_db = new Database("products.db", { verbose: console.log });
 
-
-
 // create table
 product_db.exec(
   "CREATE TABLE IF NOT EXISTS products ( \
@@ -40,7 +38,7 @@ async function main(maxPages = 10) {
     mainURL + "/tablet",
     mainURL + "/Fladskaerms-TV",
     mainURL + "/Baerbare-Festhoejttaler",
-    mainURL + "/Hjemmebio"
+    mainURL + "/Hjemmebio",
   ];
   const visitedURLs = [];
 
@@ -93,7 +91,9 @@ async function main(maxPages = 10) {
     const $ = cheerio.load(pageHTML.data);
     var product = {
       product_name: $('h1[data-type="product"]').text(),
-      product_description: $('p[class="site-product-short-description"]').text(),
+      product_description: $(
+        'p[class="site-product-short-description"]'
+      ).text(),
       main_category: $(".breadcrumb li:nth-child(2)").text(),
       sub_category: $(".breadcrumb li:nth-child(3)").text(),
       price: $(".site-currency-attention").text().trimEnd(" kr."),
@@ -104,22 +104,28 @@ async function main(maxPages = 10) {
   }
   console.log(products[0]);
 
-
-
-
-
-
   // insert data
   for (const product of products) {
     // insert product
-    product_db.prepare(
-      "INSERT INTO products (product_name, product_description, main_category, sub_category, price, link) VALUES (?, ?, ?, ?, ?, ?)").run
-      (product.product_name, product.product_description, product.main_category, product.sub_category, product.price, product.link);
+    product_db
+      .prepare(
+        "INSERT INTO products (product_name, product_description, main_category, sub_category, price, link) VALUES (?, ?, ?, ?, ?, ?)"
+      )
+      .run(
+        product.product_name,
+        product.product_description,
+        product.main_category,
+        product.sub_category,
+        product.price,
+        product.link
+      );
 
     // insert product image
-    product_db.prepare(
-      "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)").run
-      (product_db.lastInsertRowid, mainURL + product.image_url);
+    product_db
+      .prepare(
+        "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)"
+      )
+      .run(product_db.lastInsertRowid, mainURL + product.image_url);
   }
 
   // close the database connection
