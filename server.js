@@ -137,22 +137,7 @@ async function main(maxPages = 10) {
   });
 
   // create ftp connection
-  const ftpClient = new ftp();
-
-  // send data to ftp
-  ftpClient.on("ready", function () {
-    ftpClient.put("products.db", "products.db", function (err) {
-      if (err) throw err;
-      ftpClient.end();
-    });
-  });
-
-  // connect to ftp
-  ftpClient.connect({
-    host: "",
-    user: "",
-    password: "",
-  });
+  
 }
 
 main()
